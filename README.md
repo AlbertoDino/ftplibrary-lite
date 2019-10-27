@@ -1,2 +1,2 @@
-# ftplibrary-lite
+# FtpLibrary-Lite
 Very Simple FTP library
