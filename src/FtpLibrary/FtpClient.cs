@@ -54,7 +54,7 @@ namespace FtpLibrary
 		}
 	}
 
-	public class FtpWebClient : FtpClient<FtpWebRequest<dotNetFTP>>
+	public class FtpWebClient : FtpClient<FtpWebRequest<dotNetWeb>>
 	{
 		public FtpWebClient() :base(new dotNetSystem()) { }
 	}

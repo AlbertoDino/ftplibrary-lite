@@ -21,7 +21,7 @@ namespace FtpLibrary
 	/// <summary>
 	/// .Net Framework implementation of Webclient
 	/// </summary>
-	public class dotNetFTP : IWebClient
+	public class dotNetWeb : IWebClient
 	{
 		public FtpWebResponse RunFtpWebRequest(string ftprequest, string ftpmethod, string host, string ftpUsername, string ftpPassword)
 		{
