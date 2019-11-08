@@ -5,7 +5,7 @@ using System.IO;
 
 namespace FTPLibrary.test
 {
-	public class FTPWebImpl : IWebClient
+	public class DummyWebClient : IWebClient
 	{
 		public FtpWebResponse RunFtpWebRequest(string ftprequest, string ftpmethod, string host, string ftpUsername, string ftpPassword)
 		{
@@ -19,9 +19,9 @@ namespace FTPLibrary.test
 		}
 	}
 
-	public class FtpWebClientTest : FtpClient<FtpWebRequest<FTPWebImpl>>
+	public class FtpWebClientTest : FtpClient<DummyWebClient,dotNetSystem>
 	{
-		public FtpWebClientTest() : base(new dotNetSystem()) { }
+
 	}
 
 	[TestClass]

@@ -1,45 +1,47 @@
 ﻿using System;
-using System.Net;
 
 namespace FtpLibrary
 {
 	/// <summary>
 	/// FTPClient
-	/// Manages FTP requests to a FTPServer
-	/// FTP passed as a generic, ment to be used in function without any state being stored
+	/// Creates FTP requests to a FTPServer
 	/// </summary>
-	public class FtpClient<FTP> 
-		where FTP : IFTPRequest , new()
+	public class FtpClient<WebClient,Sys> : IFTPRequest
+		where WebClient : IWebClient, new()
+		where Sys : ISystem, new()
 	{
+		#region Private Members
+
+		private const string PROTOCOL = "ftp";
 		ISystem system;
 
-		public FtpClient(ISystem sys)
+		#endregion
+
+		public FtpClient()
 		{
-			if (sys == null)
-				throw new ArgumentNullException("Argument is a null reference");
-			system = sys;
+			system = new Sys();
 		}
 
 		/// <summary>
-		/// Upload a file to a FTP server and remote sub dirs to the FTP Server
+		/// Upload a file to a FTP server and creates all the sub directories relative to root
 		/// </summary>
 		public void UploadFile(string file, string host, string ftpUsername, string ftpPassword)
 		{
-			if(!system.FileExists(file))
+			if (!system.FileExists(file))
 			{
-				throw new ArgumentException(string.Format("file {0} does not exists",file));
+				throw new ArgumentException(string.Format("file {0} does not exists", file));
 			}
-			// get the relative dirs path from the root
+			// Get the relative dirs path from the root
 			string directorypaths = system.GetDirPathFromRoot(file);
-			// FTP to create the path on the ftp server
 			if (!String.IsNullOrEmpty(directorypaths))
 				CreateDirectory(directorypaths, host, ftpUsername, ftpPassword);
-			// upload the file to the ftp server
+			// Upload the file to the ftp server
 			string relativepath = system.GetPathFromRoot(file);
-			using (var ftp = new FTP())
-			{
-				ftp.UploadFile(relativepath, file, host, ftpUsername, ftpPassword);
-			}
+			new WebClient().RunFtpWebRequestUpload(Build_FTPRequest(host, relativepath)
+					, file
+					, host
+					, ftpUsername
+					, ftpPassword);
 		}
 
 		/// <summary>
@@ -47,16 +49,31 @@ namespace FtpLibrary
 		/// </summary>
 		public void CreateDirectory(string relativedirpath, string host, string ftpUsername, string ftpPassword)
 		{
-			using (var ftp = new FTP())
+			new WebClient().RunFtpWebRequest(Build_FTPRequest(host, relativedirpath)
+					, System.Net.WebRequestMethods.Ftp.MakeDirectory
+					, host
+					, ftpUsername
+					, ftpPassword);
+		}
+
+		public string Build_FTPRequest(string host, string path)
+		{
+			string ftprequest = string.Format("{0}://{1}/{2}", PROTOCOL, host, path);
+			if (!Uri.IsWellFormedUriString(ftprequest, UriKind.Absolute))
 			{
-				ftp.Send(relativedirpath, WebRequestMethods.Ftp.MakeDirectory, host, ftpUsername, ftpPassword);
+				throw new ArgumentException(string.Format("ftprequest {0} is not well formatted", ftprequest));
 			}
+			return ftprequest;
+		}
+
+		public void Dispose()
+		{
+			//So nothing
 		}
 	}
 
-	public class FtpWebClient : FtpClient<FtpWebRequest<dotNetWeb>>
+	public class FtpWebClient : FtpClient<dotNetWeb,dotNetSystem>
 	{
-		public FtpWebClient() :base(new dotNetSystem()) { }
 	}
 }
 

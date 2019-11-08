@@ -43,7 +43,6 @@
     <Compile Include="dotNetWebClient.cs" />
     <Compile Include="dotNetSystem.cs" />
     <Compile Include="FtpClient.cs" />
-    <Compile Include="FtpWebRequest.cs" />
     <Compile Include="ISystem.cs" />
     <Compile Include="IFTPRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
