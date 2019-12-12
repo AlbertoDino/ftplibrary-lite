@@ -1,2 +1,6 @@
 # FtpLibrary-Lite
-Very Simple FTP library
+a test FTP web client class for 
+* Uploading a file remotely
+* Create a folder path
+
+
