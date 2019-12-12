@@ -28,6 +28,9 @@ namespace FtpLibrary
 		/// </summary>
 		void UploadFile(string file, string host, string ftpUsername, string ftpPassword);
 
+		/// <summary>
+		/// Returns list of Item { file / directory } from a path
+		/// </summary>
 		IList<FtpItem> GetList(string path, string host, string ftpUsername, string ftpPassword);
 	}
 }
