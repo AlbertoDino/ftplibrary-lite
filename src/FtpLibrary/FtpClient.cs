@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
 
 namespace FtpLibrary
 {
@@ -6,7 +9,7 @@ namespace FtpLibrary
 	/// FTPClient
 	/// Creates FTP requests to a FTPServer
 	/// </summary>
-	public class FtpClient<WebClient,Sys> : IFTPRequest
+	public class FtpClient<WebClient, Sys> : IFTPRequest
 		where WebClient : IWebClient, new()
 		where Sys : ISystem, new()
 	{
@@ -31,13 +34,13 @@ namespace FtpLibrary
 			{
 				throw new ArgumentException(string.Format("file {0} does not exists", file));
 			}
-			// Get the relative dirs path from the root
+			// Get the relative dirs path from local drive
 			string directorypaths = system.GetDirPathFromRoot(file);
 			if (!String.IsNullOrEmpty(directorypaths))
 				CreateDirectory(directorypaths, host, ftpUsername, ftpPassword);
 			// Upload the file to the ftp server
 			string relativepath = system.GetPathFromRoot(file);
-			new WebClient().RunFtpWebRequestUpload(Build_FTPRequest(host, relativepath)
+			new WebClient().FtpUploadRequest(BuildFTPRequestURI(host, relativepath)
 					, file
 					, host
 					, ftpUsername
@@ -47,16 +50,47 @@ namespace FtpLibrary
 		/// <summary>
 		/// Create a directory path to a FTP server
 		/// </summary>
-		public void CreateDirectory(string relativedirpath, string host, string ftpUsername, string ftpPassword)
+		public void CreateDirectory(string path, string host, string ftpUsername, string ftpPassword)
 		{
-			new WebClient().RunFtpWebRequest(Build_FTPRequest(host, relativedirpath)
+			using (var response = new WebClient().FtpRequest(BuildFTPRequestURI(host, path)
 					, System.Net.WebRequestMethods.Ftp.MakeDirectory
 					, host
 					, ftpUsername
-					, ftpPassword);
+					, ftpPassword))
+			{
+				Stream responseStream = response.GetResponseStream();
+				StreamReader reader = new StreamReader(responseStream);
+				Console.WriteLine(reader.ReadToEnd());
+			}
 		}
 
-		public string Build_FTPRequest(string host, string path)
+		/// <summary>
+		/// Returns list of FtpItems from the specified path
+		/// </summary>
+		public IList<FtpItem> GetList(string path, string host, string ftpUsername, string ftpPassword)
+		{
+			List<FtpItem> itemList = new List<FtpItem>();
+			using (var response = new WebClient().FtpRequest(BuildFTPRequestURI(host, path)
+					, System.Net.WebRequestMethods.Ftp.ListDirectory
+					, host
+					, ftpUsername
+					, ftpPassword))
+			{
+				Stream responseStream = response.GetResponseStream();
+				StreamReader reader = new StreamReader(responseStream);
+				while (reader.Peek() >= 0)
+				{
+					string details = reader.ReadLine();
+					itemList.Add(new FtpItem() {
+						Name = details,
+						Type = details.Contains(".") ? FtpItemType.File : FtpItemType.Directory
+					});
+				}
+			}
+			return itemList;
+		}
+
+		public string BuildFTPRequestURI(string host, string path)
 		{
 			string ftprequest = string.Format("{0}://{1}/{2}", PROTOCOL, host, path);
 			if (!Uri.IsWellFormedUriString(ftprequest, UriKind.Absolute))
@@ -68,11 +102,11 @@ namespace FtpLibrary
 
 		public void Dispose()
 		{
-			//So nothing
+			//Do nothing
 		}
 	}
 
-	public class FtpWebClient : FtpClient<dotNetWeb,dotNetSystem>
+	public class FtpWebClient : FtpClient<dotNetWeb, dotNetSystem>
 	{
 	}
 }

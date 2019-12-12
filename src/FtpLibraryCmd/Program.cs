@@ -1,54 +1,39 @@
-﻿using System;
+﻿using FtpLibrary;
+using System;
+using System.Collections.Generic;
 
 namespace FtpLibraryCmd
 {
 	/// <summary>
-	/// FTpLibrary Cmd line
+	/// FTpLibrary Cmd line test program
+	/// 
+	/// Command line arguments:
+	/// interactive mode
+	/// > FtpLibraryCmd.exe i
+	/// 
+	/// cmd
+	/// > FtpLibraryCmd.exe <method> <request> <server> <username> <password>
+	/// 
+	/// example:
+	/// FtpLibraryCmd.exe 
+	///   upload C:\file.txt localhost admin admin
+	///   upload C:\temp\a\b\x.txt
+	///   dir temp/new/
+	///   list temp/a/b
 	/// </summary>
 	static class Program
 	{
-		static string OrDefault(this string[] args, int index, string _default)
-		{
-			if (args.Length > index) return args[index];
-			else return _default;
-		}
-
-		static bool ValidArgsforCmd(this string[] args)
-		{
-			return args != null && args.Length >= 2;
-		}
-
-		static bool IsInteractive(this string[] args)
-		{
-			return args != null && args.Length == 1 && args[0] == "i";
-		}
-
-		/// <summary>
-		/// FTpLibrary
-		/// 
-		/// Command line arguments:
-		/// interactive mode
-		/// > FtpLibraryCmd.exe i
-		/// 
-		/// cmd
-		/// > FtpLibraryCmd.exe <method> <request> <server> <username> <password>
-		/// 
-		/// example:
-		/// FtpLibraryCmd.exe upload C:\file.txt localhost admin admin
-		/// FtpLibraryCmd.exe upload C:\temp\a\b\x.txt
-		/// </summary>
 		static void Main(string[] args)
 		{
-			if(args.IsInteractive())
+			if (args.IsInteractive()) // Interactive mode
 			{
-				// Interactive
 				string arg = string.Empty;
 				Console.WriteLine("FtpLibraryCmd");
 				do
 				{
 					try
 					{
-						Console.Write("args > ");
+						Console.Write("args> ");
 						arg = Console.ReadLine();
 						Cmd(arg.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries));
 					}
@@ -77,12 +62,37 @@ namespace FtpLibraryCmd
 			switch (method.ToLower())
 			{
 				case "upload":
-					new FtpLibrary.FtpWebClient().UploadFile(request, host, username, pwd);
+					new FtpWebClient().UploadFile(request, host, username, pwd);
+					break;
+				case "dir":
+					new FtpWebClient().CreateDirectory(request, host, username, pwd);
+					break;
+				case "list":
+					IList<FtpItem> ftp = new FtpWebClient().GetList(request, host, username, pwd);
+					foreach (var item in ftp)
+					{
+						Console.WriteLine(string.Format("{0} -- {1}", item.Name, item.Type));
+					}
 					break;
 				default:
-					new FtpLibrary.FtpWebClient().CreateDirectory(request, host, username, pwd);
-					break;
+					throw new InvalidOperationException(string.Format("{0} not supported.",method));
 			}
+		}
+
+		static string OrDefault(this string[] args, int index, string _default)
+		{
+			if (args.Length > index) return args[index];
+			else return _default;
+		}
+
+		static bool ValidArgsforCmd(this string[] args)
+		{
+			return args != null && args.Length >= 2;
+		}
+
+		static bool IsInteractive(this string[] args)
+		{
+			return args != null && args.Length == 1 && args[0] == "i";
 		}
 	}
 }

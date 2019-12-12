@@ -40,7 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="dotNetWebClient.cs" />
+    <Compile Include="IWebClient.cs" />
     <Compile Include="dotNetSystem.cs" />
     <Compile Include="FtpClient.cs" />
     <Compile Include="ISystem.cs" />

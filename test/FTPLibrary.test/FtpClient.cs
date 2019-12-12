@@ -7,13 +7,13 @@ namespace FTPLibrary.test
 {
 	public class DummyWebClient : IWebClient
 	{
-		public FtpWebResponse RunFtpWebRequest(string ftprequest, string ftpmethod, string host, string ftpUsername, string ftpPassword)
+		public FtpWebResponse FtpRequest(string ftprequest, string ftpmethod, string host, string ftpUsername, string ftpPassword)
 		{
 			//this would require a ftp server mockup
 			return null;
 		}
 
-		public void RunFtpWebRequestUpload(string ftprequest, string localfilepath, string host, string ftpUsername, string ftpPassword)
+		public void FtpUploadRequest(string ftprequest, string localfilepath, string host, string ftpUsername, string ftpPassword)
 		{
 			//this would require a ftp server mockup
 		}
